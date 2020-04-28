@@ -10,14 +10,15 @@ tblsize = 1000
 
 include risslib.sco // Risset-Math library
 
-rtinput("/Users/felipetovarhenao/Documents/Audio samples/prepared piano/3. Spectrum C/C3.aif") // load sample
+rtinput("/Users/felipetovarhenao/Documents/Audio samples/prepared piano/1. Spectrum Db/Db-chord-short.aif") // load sample
 
 env = maketable("curve", "nonorm", tblsize = 3000, 0,0,1, 1,1,2, 99,1,-2, 100,0)
 
 insk = 0 // inskip
-numv = 8 // number of voices
-minbar = 1 // lowest number of repetitions on metabar 
-metabar = DUR() * 1.5 //minbar // metabar duration
+numv = 6 // number of voices
+minbar = DUR() // lowest number of repetitions on metabar 
+scl = 4 // duration scalar
+metabar = minbar * scl //minbar // metabar duration
 bars = 30 // number of metabars
 
 mode = 0 // 0: rallentando; 1: accelerando
@@ -27,13 +28,13 @@ phasesize = 0.01 // increment amount for each metabar
 
 pitchshift = 1 // scrub or stereo
 
-dist = 0.1// onset distortion
+tdist = 0 // onset distortion
 
 for (v = 0; v < numv; v += 1) {
     phase = 0
-    timeList = rissT(minbar, metabar, v) // get time points
-    rateList = rissR(minbar, timeList, v) // rate must be derived first
-    ampList = rissA(minbar, numv, v) // get amplitudes
+    timeList = riss.times(minbar, metabar, v) // get time points
+    rateList = riss.rates(minbar, timeList, v) // rate must be derived first
+    ampList = riss.amps(minbar, numv, v) // get amplitudes
     durList = xtodx(timeList) // get durations from time points (delta)
 
     if (!mode) {
@@ -52,9 +53,9 @@ for (v = 0; v < numv; v += 1) {
             rate = rateList[i]
             amp = ampList[i]
             if (pitchshift) {
-                SCRUB(max(0, st + (metabar*b) + irand(-dist, dist)), insk + (phase*rate), dur, amp, rate, 64, 32, 0, 0.5)
+                SCRUB(max(0, st + (metabar*b) + irand(-tdist, tdist)), insk + (phase*rate), dur, amp, rate, 64, 32, 0, 0.5)
             } else {
-                STEREO(max(0, st + (metabar*b) + irand(-dist, dist)), insk + phase, dur, amp * env * 0.2, pan)
+                STEREO(max(0, st + (metabar*b) + irand(-tdist, tdist)), insk + phase, dur, amp * env * 0.2, pan)
             }
 
             if (phasemode) {
